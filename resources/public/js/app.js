@@ -21852,15 +21852,18 @@ stiefel.pubsub.bus = shoreleave.pubsubs.simple.bus.call(null);
 stiefel.pubsub.topic = function topic(f) {
   return shoreleave.pubsubs.protocols.publishize.call(null, f, stiefel.pubsub.bus)
 };
+stiefel.pubsub.publish = function publish(topic, message) {
+  return shoreleave.pubsubs.protocols.publish.call(null, stiefel.pubsub.bus, topic, message)
+};
 stiefel.pubsub.subscribe = function() {
-  var subscribe__delegate = function(topics, fs) {
-    var G__3233 = cljs.core.seq.call(null, fs);
+  var subscribe__delegate = function(topic, fs) {
+    var G__7382 = cljs.core.seq.call(null, fs);
     while(true) {
-      if(G__3233) {
-        var f = cljs.core.first.call(null, G__3233);
-        shoreleave.pubsubs.protocols.subscribe.call(null, stiefel.pubsub.bus, stiefel.pubsub.topic, f);
-        var G__3234 = cljs.core.next.call(null, G__3233);
-        G__3233 = G__3234;
+      if(G__7382) {
+        var f = cljs.core.first.call(null, G__7382);
+        shoreleave.pubsubs.protocols.subscribe.call(null, stiefel.pubsub.bus, topic, f);
+        var G__7383 = cljs.core.next.call(null, G__7382);
+        G__7382 = G__7383;
         continue
       }else {
         return null
@@ -21868,22 +21871,27 @@ stiefel.pubsub.subscribe = function() {
       break
     }
   };
-  var subscribe = function(topics, var_args) {
+  var subscribe = function(topic, var_args) {
     var fs = null;
     if(goog.isDef(var_args)) {
       fs = cljs.core.array_seq(Array.prototype.slice.call(arguments, 1), 0)
     }
-    return subscribe__delegate.call(this, topics, fs)
+    return subscribe__delegate.call(this, topic, fs)
   };
   subscribe.cljs$lang$maxFixedArity = 1;
-  subscribe.cljs$lang$applyTo = function(arglist__3235) {
-    var topics = cljs.core.first(arglist__3235);
-    var fs = cljs.core.rest(arglist__3235);
-    return subscribe__delegate(topics, fs)
+  subscribe.cljs$lang$applyTo = function(arglist__7384) {
+    var topic = cljs.core.first(arglist__7384);
+    var fs = cljs.core.rest(arglist__7384);
+    return subscribe__delegate(topic, fs)
   };
   subscribe.cljs$lang$arity$variadic = subscribe__delegate;
   return subscribe
 }();
+goog.provide("stiefel.topics");
+goog.require("cljs.core");
+goog.require("stiefel.pubsub");
+goog.require("shoreleave.pubsubs.protocols");
+stiefel.topics.navigation_topic = shoreleave.pubsubs.protocols.topicify.call(null, "\ufdd0'navigation");
 goog.provide("goog.debug.EntryPointMonitor");
 goog.provide("goog.debug.entryPointRegistry");
 goog.require("goog.asserts");
@@ -32131,53 +32139,70 @@ enfocus.core.apply_transform["function"] = function(trans, nodes, chain) {
 goog.provide("stiefel.navigation");
 goog.require("cljs.core");
 goog.require("stiefel.pubsub");
+goog.require("shoreleave.pubsubs.protocols");
 goog.require("enfocus.events");
 goog.require("enfocus.core");
-stiefel.navigation.navigate_to_BANG_ = function navigate_to_BANG_(view_name) {
-  return function(event) {
-    return alert([cljs.core.str(event)].join(""))
+stiefel.navigation.navigation_state = cljs.core.atom.call(null, null);
+stiefel.pubsub.topic.call(null, stiefel.navigation.navigation_state);
+stiefel.navigation.highlight_navigation_item = function highlight_navigation_item(p__16113) {
+  var map__16115 = p__16113;
+  var map__16115__$1 = cljs.core.seq_QMARK_.call(null, map__16115) ? cljs.core.apply.call(null, cljs.core.hash_map, map__16115) : map__16115;
+  var new$ = cljs.core._lookup.call(null, map__16115__$1, "\ufdd0'new", null);
+  var old = cljs.core._lookup.call(null, map__16115__$1, "\ufdd0'old", null);
+  if(!(old == null)) {
+    enfocus.core.at.call(null, document, cljs.core.PersistentVector.fromArray([[cljs.core.str("#nav-item-"), cljs.core.str(old)].join("")], true), enfocus.core.remove_class.call(null, "active"))
+  }else {
   }
+  return enfocus.core.at.call(null, document, cljs.core.PersistentVector.fromArray([[cljs.core.str("#nav-item-"), cljs.core.str(new$)].join("")], true), enfocus.core.add_class.call(null, "active"))
 };
-enfocus.core.load_remote_dom.call(null, "templates/navigation.html", "remotetemplates/navigation.html", "en3200_");
+stiefel.pubsub.subscribe.call(null, stiefel.navigation.navigation_state, stiefel.navigation.highlight_navigation_item);
+enfocus.core.load_remote_dom.call(null, "templates/navigation.html", "remotetemplates/navigation.html", "en3204_");
 if(cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remotetemplates/navigation.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remotetemplates/navigation.html", cljs.core.PersistentVector.fromArray(["", "NOT_LOADED"], true))
 }else {
 }
 stiefel.navigation.navigation_bar = function navigation_bar(name) {
-  var vec__3204 = function() {
+  var vec__16119 = function() {
     return enfocus.core.get_cached_dom.call(null, "remotetemplates/navigation.html")
   }.call(null);
-  var id_sym3201 = cljs.core.nth.call(null, vec__3204, 0, null);
-  var pnod3202 = cljs.core.nth.call(null, vec__3204, 1, null);
-  var pnod3202__$1 = enfocus.core.create_hidden_dom.call(null, pnod3202);
-  enfocus.core.i_at.call(null, id_sym3201, pnod3202__$1, cljs.core.PersistentVector.fromArray(["a.brand"], true), enfocus.core.content.call(null, name));
-  enfocus.core.reset_ids.call(null, id_sym3201, pnod3202__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod3202__$1)
+  var id_sym16116 = cljs.core.nth.call(null, vec__16119, 0, null);
+  var pnod16117 = cljs.core.nth.call(null, vec__16119, 1, null);
+  var pnod16117__$1 = enfocus.core.create_hidden_dom.call(null, pnod16117);
+  enfocus.core.i_at.call(null, id_sym16116, pnod16117__$1, cljs.core.PersistentVector.fromArray(["a.brand"], true), enfocus.core.content.call(null, name));
+  enfocus.core.reset_ids.call(null, id_sym16116, pnod16117__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod16117__$1)
 };
-enfocus.core.load_remote_dom.call(null, "templates/navigation.html", "remotetemplates/navigation.html", "en3200_");
+enfocus.core.load_remote_dom.call(null, "templates/navigation.html", "remotetemplates/navigation.html", "en3204_");
 if(cljs.core.deref.call(null, enfocus.core.tpl_cache).call(null, "remotetemplates/navigation.html") == null) {
   cljs.core.swap_BANG_.call(null, enfocus.core.tpl_cache, cljs.core.assoc, "remotetemplates/navigation.html", cljs.core.PersistentVector.fromArray(["", "NOT_LOADED"], true))
 }else {
 }
-stiefel.navigation.navigation_item = function navigation_item(p__3207) {
-  var map__3210 = p__3207;
-  var map__3210__$1 = cljs.core.seq_QMARK_.call(null, map__3210) ? cljs.core.apply.call(null, cljs.core.hash_map, map__3210) : map__3210;
-  var view_name = cljs.core._lookup.call(null, map__3210__$1, "\ufdd0'view-name", null);
-  var text = cljs.core._lookup.call(null, map__3210__$1, "\ufdd0'text", null);
-  var url = cljs.core._lookup.call(null, map__3210__$1, "\ufdd0'url", null);
-  var active = cljs.core._lookup.call(null, map__3210__$1, "\ufdd0'active", null);
-  var vec__3211 = function() {
+stiefel.navigation.navigation_item = function navigation_item(p__16123) {
+  var map__16126 = p__16123;
+  var map__16126__$1 = cljs.core.seq_QMARK_.call(null, map__16126) ? cljs.core.apply.call(null, cljs.core.hash_map, map__16126) : map__16126;
+  var view_name = cljs.core._lookup.call(null, map__16126__$1, "\ufdd0'view-name", null);
+  var text = cljs.core._lookup.call(null, map__16126__$1, "\ufdd0'text", null);
+  var url = cljs.core._lookup.call(null, map__16126__$1, "\ufdd0'url", null);
+  var active = cljs.core._lookup.call(null, map__16126__$1, "\ufdd0'active", null);
+  var vec__16127 = function() {
     return enfocus.core.get_cached_snippet.call(null, "remotetemplates/navigation.html", cljs.core.PersistentVector.fromArray(["ul.nav > *:first-child"], true))
   }.call(null);
-  var id_sym3205 = cljs.core.nth.call(null, vec__3211, 0, null);
-  var pnod3206 = cljs.core.nth.call(null, vec__3211, 1, null);
-  var pnod3206__$1 = enfocus.core.create_hidden_dom.call(null, pnod3206);
-  enfocus.core.i_at.call(null, id_sym3205, pnod3206__$1, cljs.core.PersistentVector.fromArray(["li"], true), enfocus.core.do__GT_.call(null, enfocus.core.add_class.call(null, cljs.core.truth_(active) ? "active" : ""), enfocus.core.set_attr.call(null, "\ufdd0'id", view_name)), cljs.core.PersistentVector.fromArray(["li a"], true), enfocus.core.do__GT_.call(null, enfocus.core.set_attr.call(null, "\ufdd0'href", url), enfocus.core.content.call(null, text), enfocus.events.listen.call(null, "\ufdd0'click", 
-  stiefel.navigation.navigate_to_BANG_.call(null, view_name))));
-  enfocus.core.reset_ids.call(null, id_sym3205, pnod3206__$1);
-  return enfocus.core.remove_node_return_child.call(null, pnod3206__$1)
+  var id_sym16121 = cljs.core.nth.call(null, vec__16127, 0, null);
+  var pnod16122 = cljs.core.nth.call(null, vec__16127, 1, null);
+  var pnod16122__$1 = enfocus.core.create_hidden_dom.call(null, pnod16122);
+  enfocus.core.i_at.call(null, id_sym16121, pnod16122__$1, cljs.core.PersistentVector.fromArray(["li"], true), enfocus.core.do__GT_.call(null, enfocus.core.add_class.call(null, cljs.core.truth_(active) ? "active" : ""), enfocus.core.set_attr.call(null, "\ufdd0'id", [cljs.core.str("nav-item-"), cljs.core.str(view_name)].join(""))), cljs.core.PersistentVector.fromArray(["li a"], true), enfocus.core.do__GT_.call(null, enfocus.core.set_attr.call(null, "\ufdd0'href", url), enfocus.core.content.call(null, 
+  text), enfocus.events.listen.call(null, "\ufdd0'click", function() {
+    return cljs.core.reset_BANG_.call(null, stiefel.navigation.navigation_state, view_name)
+  })));
+  enfocus.core.reset_ids.call(null, id_sym16121, pnod16122__$1);
+  return enfocus.core.remove_node_return_child.call(null, pnod16122__$1)
 };
 stiefel.navigation.render_navigation_BANG_ = function render_navigation_BANG_(name, items) {
+  var active_item = cljs.core.first.call(null, cljs.core.filter.call(null, function(p1__16120_SHARP_) {
+    return(new cljs.core.Keyword("\ufdd0'active")).call(null, p1__16120_SHARP_)
+  }, items));
+  var active_view_name = (new cljs.core.Keyword("\ufdd0'view-name")).call(null, active_item);
+  cljs.core.reset_BANG_.call(null, stiefel.navigation.navigation_state, active_view_name);
   return enfocus.core.at.call(null, document, cljs.core.PersistentVector.fromArray(["#navigation"], true), enfocus.core.content.call(null, stiefel.navigation.navigation_bar.call(null, name)), cljs.core.PersistentVector.fromArray(["ul.nav"], true), enfocus.core.content.call(null, cljs.core.map.call(null, stiefel.navigation.navigation_item, items)))
 };
 goog.provide("stiefel.app");

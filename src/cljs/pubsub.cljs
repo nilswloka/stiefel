@@ -8,6 +8,9 @@
 (defn topic [f]
   (pubsub/publishize f bus))
 
-(defn subscribe [topics & fs]
+(defn publish [topic message]
+  (pubsub/publish bus topic message))
+
+(defn subscribe [topic & fs]
   (doseq [f fs]
     (pubsub/subscribe bus topic f)))
